@@ -1,0 +1,13 @@
+<div>
+  <h2>{{ productNewCtrl.product.name }}</h2>
+  <label for="product_name">Name:</label>
+  <input type="text" id="product_name" ng-model="productNewCtrl.product.name">
+  <br>
+  <label for="product_description">Description:</label>
+  <textarea id="product_name" ng-model="productNewCtrl.product.description"></textarea>
+  <br>
+  <label for="product_price">Price:</label>
+  <input type="text" id="product_price" ng-model="productNewCtrl.product.price">
+  <br>
+  <button ng-click="productNewCtrl.saveProduct()">Save</button>
+</div>

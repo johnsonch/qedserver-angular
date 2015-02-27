@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>Products</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
+    
+  </head>
+  <body ng-app="products">
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-resource.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-route.min.js"></script>
+    <script>
+
+      var ProductsApp = angular.module("products", ["ngResource", "ngRoute"]);
+      ProductsApp.config(['$routeProvider', function($routeProvider) {
+        $routeProvider.
+          when("/products",{ controller: "ProductsCtrl as productsCtrl", 
+                             templateUrl: "products.html"}).
+          when("/products/new",{ controller: "ProductNewCtrl as productNewCtrl", 
+                                 templateUrl: "productNew.html"}).
+          when("/products/:id",{ controller: "ProductCtrl as productCtrl", 
+                                 templateUrl: "product.html"}).
+          when("/products/:id/edit",{ controller: "ProductEditCtrl as productEditCtrl", 
+                                      templateUrl: "productEdit.html"}).
+          otherwise({redirectTo : "/products"});
+      }]);
+
+      ProductsApp.controller("ProductsCtrl", function($resource){
+
+        var Products = $resource('/products.json');
+
+        var ProductsCtrl = function() {
+          this.products = Products.query();
+        };
+
+        return new ProductsCtrl();
+      });
+
+      ProductsApp.controller("ProductNewCtrl", function($resource, $location){
+
+        var Product = $resource('/products.json');
+
+        var ProductNewCtrl = function() {
+          this.product = new Product();
+        }
+
+        ProductNewCtrl.prototype.saveProduct = function() {
+          var self = this;
+          Product.save(self.product, function(){
+            alert(self.product.name + " saved!");
+            $location.path("/");
+          });
+        };
+
+        return new ProductNewCtrl();
+      });
+
+      ProductsApp.controller("ProductCtrl", function($resource, $routeParams){
+
+        var Product = $resource('/products/:id.json', {id: "@id"});
+
+        var ProductCtrl = function() {
+          var id = $routeParams.id;
+          this.product = Product.get({id: id});
+        };
+
+        return new ProductCtrl();
+      });
+
+      ProductsApp.controller("ProductEditCtrl", function($resource, $routeParams, $location){
+
+        var Product = $resource('/products/:id.json', {id: "@id"}, {update: {method:'PUT'}});
+
+        var ProductEditCtrl = function() {
+          var id = $routeParams.id;
+          this.product = Product.get({id: id});
+        };
+
+        ProductEditCtrl.prototype.saveProduct = function() {
+          var self = this;
+          Product.update(self.product, function(){
+            alert(self.product.name + " saved!");
+            $location.path("/");
+          });
+        };
+
+        return new ProductEditCtrl();
+      });
+
+    </script>
+ 
+    <ng-view></ng-view>
+ 
+    <script type="text/ng-template" id="products.html">
+      <div>
+        <ul>
+          <li ng-repeat="product in productsCtrl.products">
+            <a href="#/products/{{product.id}}">{{ product.name }}</a>
+          </li>
+        </ul>
+      </div>
+    </script>
+    
+    <script type="text/ng-template" id="product.html">
+      <div>
+        <h2>{{ productCtrl.product.name }}</h2>
+        <p> {{ productCtrl.product.description }} </p>
+        <p> {{ productCtrl.product.price }} </p>
+      </div>
+    </script>
+    
+    <script type="text/ng-template" id="productEdit.html">
+      <div>
+        <h2>{{ productEditCtrl.product.name }}</h2>
+        <label for="product_name">Name:</label>
+        <input type="text" id="product_name" ng-model="productEditCtrl.product.name">
+        <br>
+        
+        <label for="product_description">Description:</label>
+        <textarea id="product_name" ng-model="productEditCtrl.product.description"></textarea>
+        <br>
+ 
+        <label for="product_price">Name:</label>
+        <input type="text" id="product_price" ng-model="productEditCtrl.product.price">
+        <br>
+ 
+        <button ng-click="productEditCtrl.saveProduct()">Save</button>
+ 
+      </div>
+    </script>
+    <script type="text/ng-template" id="productNew.html">
+      <div>
+        <h2>{{ productNewCtrl.product.name }}</h2>
+        <label for="product_name">Name:</label>
+        <input type="text" id="product_name" ng-model="productNewCtrl.product.name">
+        <br>
+        
+        <label for="product_description">Description:</label>
+        <textarea id="product_name" ng-model="productNewCtrl.product.description"></textarea>
+        <br>
+ 
+        <label for="product_price">Price:</label>
+        <input type="text" id="product_price" ng-model="productNewCtrl.product.price">
+        <br>
+ 
+        <button ng-click="productNewCtrl.saveProduct()">Save</button>
+ 
+      </div>
+    </script>
+  </body>
+</html>
